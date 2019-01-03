@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:testSuite id="6a1807cc-f295-4ff0-8222-a738d3daa3b2" name="司机管理" disabled="true" xmlns:con="http://eviware.com/soapui/config"><con:settings><con:setting id="6a1807cc-f295-4ff0-8222-a738d3daa3b2fileName">司机管理</con:setting></con:settings><con:savedRecentRuns>1</con:savedRecentRuns><con:runType>SEQUENTIAL</con:runType><con:properties/><con:reportParameters/></con:testSuite>

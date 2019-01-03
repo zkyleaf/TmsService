@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:testCase id="aef3dd0f-282b-486a-b676-ec267673f67a" discardOkResults="true" failOnError="true" failTestCaseOnErrors="true" keepSession="true" name="Copy of 接口校验：提货单详情" searchProperties="true" timeout="0" wsrmEnabled="false" wsrmVersion="1.0" wsrmAckTo="" amfAuthorisation="false" amfEndpoint="" amfLogin="" amfPassword="" xmlns:con="http://eviware.com/soapui/config"><con:settings><con:setting id="aef3dd0f-282b-486a-b676-ec267673f67afileName">Copy-of-接口校验%EF%BC%9A提货单详情</con:setting></con:settings><con:savedRecentRuns>1</con:savedRecentRuns><con:testStep type="properties" name="Properties" id="4d0411cb-2db0-4561-8226-6c042e45c636"><con:settings/><con:config xsi:type="con:PropertiesStep" saveFirst="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:properties><con:property><con:name>loginName</con:name><con:value>MTAxODIzODcyMkBxcS5jb20=</con:value></con:property><con:property><con:name>password</con:name><con:value>emt5MTIzNDU2</con:value></con:property><con:property><con:name>mobileNumber</con:name></con:property><con:property><con:name>currentWarehouseId</con:name><con:value>568036595</con:value></con:property><con:property><con:name>customerOrderNo</con:name><con:value>客户单号-zky自动化接口测试使用</con:value></con:property></con:properties></con:config></con:testStep><con:testStep type="datagen" name="DataGen" id="07960a06-3280-4459-aa89-e1c58a0cc9c9"><con:settings/><con:config xsi:type="con:DataGeneratorStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:property type="Script"><con:configuration><script>
+def  realName="zky司机"+new Date().format("yyyyMMddHHmmss");</script></con:configuration><con:name>realName</con:name><con:mode>STEP</con:mode><con:shared>false</con:shared></con:property><con:property type="Script"><con:configuration><script>def  tf_timestamp=new Date().format("yyyyMMddHHmmss")</script></con:configuration><con:name>tf_timestamp</con:name><con:mode>STEP</con:mode><con:shared>false</con:shared></con:property><con:property type="Script"><con:configuration><script>def waybillNo=Math.random()*10000000</script></con:configuration><con:name>waybillNo</con:name><con:mode>STEP</con:mode><con:shared>false</con:shared></con:property><con:property type="Script"><con:configuration><script>def waybillNum=Math.random()*10000000</script></con:configuration><con:name>waybillNum</con:name><con:mode>STEP</con:mode><con:shared>false</con:shared></con:property><con:property type="Script"><con:configuration><script>def  NOW=new Date().format("yyyy-MM-dd HH:mm:ss")
+</script></con:configuration><con:name>NOW</con:name><con:mode>STEP</con:mode><con:shared>false</con:shared></con:property></con:config></con:testStep><con:testStep type="groovy" name="tf_sign" id="8e60b3eb-8f20-47a1-ae0b-e121c6fac6cd"><con:settings/><con:config><script><![CDATA[import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.Map;
+import groovy.json.JsonSlurper;
+
+handleParamaters("会员登录","K77MFVhwk348J4h72nHi");
+
+def void handleParamaters(String testStepName,String myKey)
+{
+
+	//如果没有有时间戳，请删除
+	def time=new Date().format("yyyyMMddHHmmss")
+	testRunner.testCase.getTestStepByName(testStepName).setPropertyValue("tf_timestamp",time)
+
+	
+	//自动获取参数
+	List<String> list=testRunner.testCase.getTestStepByName(testStepName).getPropertyNames()
+	Map<String, String> map = new HashMap<String, String>();
+	for(int i=0;i<list.size();i++)
+	{
+//		if(!list.get(i).equals("RawRequest")&&list.get(i)!="ResponseAsXml"&&list.get(i)!="Domain"&&list.get(i)!="Password"&&list.get(i)!="Username"&&list.get(i)!="Response"&&list.get(i)!="Request"&&list.get(i)!="Endpoint"&&list.get(i)!="sign")
+		if(!list.get(i).equals("RawRequest")&&list.get(i)!="ResponseAsXml"&&list.get(i)!="Domain"&&list.get(i)!="Password"&&list.get(i)!="Username"&&list.get(i)!="Response"&&list.get(i)!="Request"&&list.get(i)!="Endpoint"&&list.get(i)!="sign"&&list.get(i)!="HarResponse"&&list.get(i)!="RawResponse"&&list.get(i)!="callback"&&list.get(i)!="tf_ignore")
+		{
+			def res = context.expand(testRunner.testCase.getTestStepByName(testStepName).getPropertyValue(list.get(i)));
+			log.info('res--------'+res);
+			map.put(list.get(i),res);
+		}
+	}
+	//加密
+	String md5 = sign(map,myKey,"utf-8")
+	//将加密值传给sign
+	testRunner.testCase.getTestStepByName(testStepName).setPropertyValue("tf_sign",md5)
+	
+}
+
+/**
+	 * 签名字符串
+	 * @param params
+	 * @param key
+	 * @param charset
+	 * @return
+	 */
+def String sign(Map<String,String> params, String key, String charset) {
+
+    	//1. tf_sign不加入签名
+    	params.remove('tf_sign');
+    	//2. 加入sk
+    	params.put('dog_sk', key);
+		//3. 对请求参数的值进行排序
+		String keyString = createLinkString(params);
+		//4. 生成md5
+		return generateMd5(keyString, charset);
+    }
+
+
+    
+    /**
+     * 生成md5
+     * @param key
+     * @param charset
+     * @return
+     */
+def String generateMd5(String keyString, String charset){
+    	String result = '';
+		try {
+			MessageDigest md5 = MessageDigest.getInstance('MD5');
+			md5.update(keyString.getBytes(charset));
+			byte[] temp;
+			temp = md5.digest(''.getBytes(charset));
+			for (int i = 0; i < temp.length; i++) {
+				result += Integer.toHexString(((int)0x000000ff & temp[i]) | (int)0xffffff00).substring(6);
+			}	
+			result = result.toUpperCase();
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException('MD5签名过程中出现错误' + e);
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException('MD5签名过程中出现错误,指定的编码集不对,您目前指定的编码集是:' + charset);
+		}    	
+		return result;
+    }
+
+
+
+
+    /** 
+     * 把数组所有元素排序，并参数值拼接成字符串
+     * @param params 需要排序并参与字符拼接的参数组
+     * @return 拼接后字符串
+     */
+def String createLinkString(Map<String, String> params) {
+    	Object[] keys = params.keySet().toArray();
+        Arrays.sort(keys);
+        StringBuffer sb = new StringBuffer();
+		for (int i = keys.length - 1; i >= 0; i--) {
+			sb.append(params.get(keys[i]));
+		}
+        return sb.toString();
+    }]]></script></con:config></con:testStep><con:testStep type="restrequest" name="会员登录" id="193d7dd5-e172-42c4-84a0-5d4601a3a705"><con:settings/><con:config service="http://10.7.28.14" resourcePath="/passport/partycommonmanage/webLogin" methodName="Method 1" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="会员登录" id="c6591842-78d3-4cec-a58f-781e17e1fdd9" mediaType="application/json"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://10.7.28.14</con:endpoint><con:request/><con:originalUri>http://10.7.28.14/passport/partycommonmanage/webLogin</con:originalUri><con:assertion type="JsonPath Match" id="4137c62e-8ae9-48f1-aa6f-5c56f9d39693" name="Match content of [msg]"><con:configuration><path>$.msg</path><content>success</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:credentials><con:selectedAuthProfile>No Authorization</con:selectedAuthProfile><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:parameters>
+  <con:entry key="tf_timestamp" value="20181228172251"/>
+  <con:entry key="clientdfp" value="wertyuighf"/>
+  <con:entry key="password" value="${Properties#password}"/>
+  <con:entry key="loginName" value="${Properties#loginName}"/>
+  <con:entry key="tf_sign" value="EE02897E30B9E3747702BBF05A66B92C"/>
+</con:parameters><con:parameterOrder><con:entry>dog_ak</con:entry><con:entry>sourcecode</con:entry><con:entry>tf_timestamp</con:entry><con:entry>clientdfp</con:entry><con:entry>tf_ignore</con:entry><con:entry>loginName</con:entry><con:entry>password</con:entry><con:entry>clientIp</con:entry><con:entry>tf_sign</con:entry></con:parameterOrder></con:restRequest></con:config></con:testStep><con:testStep type="groovy" name="cookies" id="7dfac27c-a07b-447f-a825-e7d513ab719c"><con:settings/><con:config><script>import net.sf.json.JSONObject;
+import com.eviware.soapui.support.types.StringToStringMap
+
+//获取token
+String data = context.expand( '${会员登录#Response#$.data}' )
+JSONObject json=JSONObject.fromObject(data)
+log.info(json);
+String token1="session_key="+json.getString('session_key');
+//log.info("session_key的值为：" + token);
+String warehousekey="_warehouse_key="+'568028583';
+
+log.info("warehousekey"+warehousekey);
+String token=token1+";"+warehousekey;
+log.info("token"+token);
+
+//设置map
+HashMap&lt;String,String> hashmap1=new HashMap&lt;String,String>()
+hashmap1.put('Cookie',token1)
+StringToStringMap cookieMap1 = new StringToStringMap(hashmap1)
+log.info("cookieMap1"+cookieMap1);
+
+//设置map +warehousekey
+HashMap&lt;String,String> hashmap=new HashMap&lt;String,String>()
+hashmap.put('Cookie',token)
+StringToStringMap cookieMap = new StringToStringMap(hashmap)
+log.info("cookieMap"+cookieMap);
+//设置cookie
+testRunner.testCase.getTestStepByName("csrfToken").testRequest.setRequestHeaders(cookieMap1);
+testRunner.testCase.getTestStepByName("切换网点").testRequest.setRequestHeaders(cookieMap1);
+testRunner.testCase.getTestStepByName("步骤1：创建运单-上门提货+自提").testRequest.setRequestHeaders(cookieMap1);
+testRunner.testCase.getTestStepByName("查询未出库计划单-keywords").testRequest.setRequestHeaders(cookieMap1);
+testRunner.testCase.getTestStepByName("创建提货").testRequest.setRequestHeaders(cookieMap1);
+testRunner.testCase.getTestStepByName("执行提配").testRequest.setRequestHeaders(cookieMap1);
+testRunner.testCase.getTestStepByName("提配完成").testRequest.setRequestHeaders(cookieMap1);
+
+testRunner.testCase.getTestStepByName("提货单详情").testRequest.setRequestHeaders(cookieMap1);
+
+
+
+
+
+//设置cookie  ： sessionkey+warehousekey
+//testRunner.testCase.getTestStepByName("查询司机列表").testRequest.setRequestHeaders(cookieMap);
+</script></con:config></con:testStep><con:testStep type="restrequest" name="csrfToken" id="7e68b268-b899-4547-8997-eb17e5759b07"><con:settings/><con:config service="http://10.77.0.147" resourcePath="/scTmsWeb/csrfTokenServlet" methodName="获取csrfToken" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="csrfToken" id="99fd653c-4388-4e64-9456-a5c596410372" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;entry key="Cookie" value="session_key=6EA0732944BD434D8F79A53BDD6A2D0A_session_568007135" xmlns="http://eviware.com/soapui/config"/></con:setting></con:settings><con:endpoint>http://10.77.0.147</con:endpoint><con:request/><con:originalUri>http://10.77.0.147/scTmsWeb/csrfTokenServlet</con:originalUri><con:assertion type="JsonPath Match" id="fa93f2c2-86f7-4041-af19-60c19d853533" name="Match content of [result]"><con:configuration><path>$.result</path><content>success</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:credentials><con:selectedAuthProfile>No Authorization</con:selectedAuthProfile><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:parameters/><con:parameterOrder/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="切换网点" id="044056c7-0d80-4ed2-bacc-5c9fc38be6d2"><con:settings/><con:config service="http://10.77.0.147" resourcePath="/scTmsWeb/warehouse/changeCurrentWarehouse" methodName="切换网点" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="切换网点" id="aa421939-b243-432f-8602-ac01462e4092" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;entry key="Cookie" value="session_key=6EA0732944BD434D8F79A53BDD6A2D0A_session_568007135" xmlns="http://eviware.com/soapui/config"/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>http://10.77.0.147</con:endpoint><con:request>{"currentWarehouseId": "${Properties#currentWarehouseId}"}</con:request><con:originalUri>http://10.77.0.147/scTmsWeb/warehouse/changeCurrentWarehouse</con:originalUri><con:assertion type="JsonPath Match" id="5a2815ed-1435-4c3d-8461-1b6e51557c14" name="Match content of [msg]"><con:configuration><path>$.msg</path><content>success</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:credentials><con:selectedAuthProfile>No Authorization</con:selectedAuthProfile><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:parameters><entry key="csrfToken" value="${csrfToken#Response#$.data}" xmlns="http://eviware.com/soapui/config"/></con:parameters><con:parameterOrder><con:entry>csrfToken</con:entry></con:parameterOrder></con:restRequest></con:config></con:testStep><con:testStep type="datasource" name="DataSource" id="ae417943-692f-40a5-8e0c-0cba91fdd7c9" disabled="true"><con:settings/><con:config xsi:type="con:DataSourceStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:dataSource type="Grid"><con:configuration><check><![CDATA[<xml-fragment><con:entry xmlns:con="http://eviware.com/soapui/config">false</con:entry><con:entry xmlns:con="http://eviware.com/soapui/config">false</con:entry><con:entry xmlns:con="http://eviware.com/soapui/config">true</con:entry><con:entry xmlns:con="http://eviware.com/soapui/config">true</con:entry><con:entry xmlns:con="http://eviware.com/soapui/config">true</con:entry><con:entry xmlns:con="http://eviware.com/soapui/config">true</con:entry><con:entry xmlns:con="http://eviware.com/soapui/config">true</con:entry><con:entry xmlns:con="http://eviware.com/soapui/config">true</con:entry><con:entry xmlns:con="http://eviware.com/soapui/config">true</con:entry><con:entry xmlns:con="http://eviware.com/soapui/config">true</con:entry><con:entry xmlns:con="http://eviware.com/soapui/config">true</con:entry><con:entry xmlns:con="http://eviware.com/soapui/config">true</con:entry></xml-fragment>]]></check><row>&lt;xml-fragment>&lt;con:entry xmlns:con="http://eviware.com/soapui/config">6288387.244528331&lt;/con:entry>&lt;con:entry xmlns:con="http://eviware.com/soapui/config"/>&lt;/xml-fragment></row><row>&lt;xml-fragment>&lt;con:entry xmlns:con="http://eviware.com/soapui/config">9E6D3ZOD18120700000047&lt;/con:entry>&lt;con:entry xmlns:con="http://eviware.com/soapui/config"/>&lt;/xml-fragment></row><row>&lt;xml-fragment>&lt;con:entry xmlns:con="http://eviware.com/soapui/config">zky发货人&lt;/con:entry>&lt;con:entry xmlns:con="http://eviware.com/soapui/config"/>&lt;/xml-fragment></row><row>&lt;xml-fragment>&lt;con:entry xmlns:con="http://eviware.com/soapui/config">zky收货人&lt;/con:entry>&lt;con:entry xmlns:con="http://eviware.com/soapui/config"/>&lt;/xml-fragment></row><row>&lt;xml-fragment>&lt;con:entry xmlns:con="http://eviware.com/soapui/config">13575458888&lt;/con:entry>&lt;con:entry xmlns:con="http://eviware.com/soapui/config"/>&lt;/xml-fragment></row><row>&lt;xml-fragment>&lt;con:entry xmlns:con="http://eviware.com/soapui/config">13575459999&lt;/con:entry>&lt;con:entry xmlns:con="http://eviware.com/soapui/config"/>&lt;/xml-fragment></row><row>&lt;xml-fragment>&lt;con:entry xmlns:con="http://eviware.com/soapui/config">北京市市辖区东城区周科玉测试SoapUI发货地址1&lt;/con:entry>&lt;con:entry xmlns:con="http://eviware.com/soapui/config"/>&lt;/xml-fragment></row><row>&lt;xml-fragment>&lt;con:entry xmlns:con="http://eviware.com/soapui/config">浙江省杭州市上城区周科玉soapUI自动化测试发货地址2&lt;/con:entry>&lt;con:entry xmlns:con="http://eviware.com/soapui/config"/>&lt;/xml-fragment></row><row>&lt;xml-fragment>&lt;con:entry xmlns:con="http://eviware.com/soapui/config">周科玉专用2SoapUI&lt;/con:entry>&lt;con:entry xmlns:con="http://eviware.com/soapui/config"/>&lt;/xml-fragment></row><row>&lt;xml-fragment>&lt;con:entry xmlns:con="http://eviware.com/soapui/config">客户单号-zky自动化接口测试使用&lt;/con:entry>&lt;con:entry xmlns:con="http://eviware.com/soapui/config"/>&lt;/xml-fragment></row><row>&lt;xml-fragment>&lt;con:entry xmlns:con="http://eviware.com/soapui/config">客户单号-zky自动化接口&lt;/con:entry>&lt;con:entry xmlns:con="http://eviware.com/soapui/config"/>&lt;/xml-fragment></row><row>&lt;xml-fragment>&lt;con:entry xmlns:con="http://eviware.com/soapui/config">zky&lt;/con:entry>&lt;con:entry xmlns:con="http://eviware.com/soapui/config"/>&lt;/xml-fragment></row></con:configuration></con:dataSource><con:property>keywords</con:property><con:completeLastOperation>true</con:completeLastOperation><con:restartOnRun>true</con:restartOnRun></con:config></con:testStep><con:testStep type="restrequest" name="步骤1：创建运单-上门提货+自提" id="21cbb947-d128-464c-9ac0-eee96679b41e" disabled="true"><con:settings/><con:config service="http://10.77.0.147" resourcePath="/scTmsWeb/waybill/createWaybill" methodName="创建运单" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="步骤1：创建运单-上门提货+自提" id="43e391bd-7f08-445f-a44e-6eca47701b24" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;entry key="Cookie" value="session_key=6EA0732944BD434D8F79A53BDD6A2D0A_session_568007135" xmlns="http://eviware.com/soapui/config"/></con:setting></con:settings><con:endpoint>http://10.77.0.147</con:endpoint><con:request>{
+   "waybillNo": "${DataGen#waybillNo}",
+   "waybillNum": "${DataGen#waybillNum}",
+   "endAddressPoi": "石家庄市",
+   "deliveryDate": "2018-12-13 10:26:51",
+   "account": "",
+   "mobile": "",
+   "idCardNumber": "",
+   "receiptPartyId": "",
+   "bank": "",
+   "bankCard": "",
+   "bankProvince": "",
+   "bankCity": "",
+   "bankBranch": "",
+   "updateVersion": "",
+   "transferWarehouseId": 568036595,
+   "transferWarehouseName": "周科玉专用1SoapUI",
+   "endWarehouseId": 568036597,
+   "endWarehouseName": "周科玉专用2SoapUI",
+   "startAddress": "河北省",
+   "endAddress": "石家庄市",
+   "customerOrderNo": "${Properties#customerOrderNo}",
+   "goodsCode": "18121300000079-6",
+   "agent": "zkySoapUI",
+   "receiptMethod": "1",
+   "deliveryMethod": "0",
+   "payMethod": "现付",
+   "senderId": "",
+   "senderName": "zky发货人",
+   "sendIDCardNo": "",
+   "senderPhone": "13575458888",
+   "senderAddress": "北京市市辖区东城区",
+   "senderFullAddress": "周科玉测试SoapUI发货地址1",
+   "senderProvince": "北京市",
+   "senderCity": "市辖区",
+   "senderRegion": "东城区",
+   "senderStreet": "",
+   "senderPoi": "110101",
+   "receiverId": 568036615,
+   "receiverName": "zky收货人",
+   "receiverPhone": "13575459999",
+   "receiverAddress": "浙江省杭州市上城区",
+   "receiverFullAddress": "周科玉soapUI自动化测试发货地址2",
+   "receiverProvince": "浙江省",
+   "receiverCity": "杭州市",
+   "receiverRegion": "上城区",
+   "receiverStreet": "",
+   "receiverPoi": "330102",
+   "pickMethod": "1",
+   "controlGoods": "0",
+   "infoStatus": "0",
+   "wayFee": 14,
+   "goodsValue": "0",
+   "goodsCustomValue": "0",
+   "packingFee": "0",
+   "deliveryPayFee": "0",
+   "predictTransitFee": "0",
+   "predictDeliveryPayFee": "0",
+   "upstairsFee": "0",
+   "takePayFee": "0",
+   "returnFee": "0",
+   "otherFee": "0",
+   "deliverWarehouseFee": "0",
+   "infoFee": "0",
+   "agentFee": "0",
+   "agentExtractFee": "0",
+   "childReturnFee": "0",
+   "agentType": "非传化",
+   "receiptAccountType": "无",
+   "sendPayFee": 14,
+   "receivePayFee": "0",
+   "returnPayFee": "0",
+   "monthClearing": "0",
+   "oilCardPayFee": "0",
+   "receiptNum": 1,
+   "remark": "soapui自动化接口测试上门提货+配送",
+   "codType": "",
+   "wayFeeBase": 0,
+   "deliveryPayFeeBase": 0,
+   "takePayFeeBase": 0,
+   "weightUnit": "t",
+   "sendLatitude": 0,
+   "sendLongitude": 0,
+   "receiverLatitude": 0,
+   "receiverLongitude": 0,
+   "utGoodsDTOList": [   {
+      "k": 0,
+      "goodsName": "soapui自动化测试货物1",
+      "goodsNumber": "1",
+      "goodsWeight": 1000,
+      "goodsVolume": 1,
+      "goodsType": "1",
+      "goodsPackage": "1",
+      "goodsValue": 1,
+      "goodsNumberUnit": "0"
+   }]
+}</con:request><con:originalUri>http://10.77.0.147/scTmsWeb/waybill/createWaybill</con:originalUri><con:assertion type="GroovyScriptAssertion" id="9703a21c-a0f4-4ae4-ba4b-640011ddceab" name="Assert node [body]"><con:configuration><scriptText>import com.eviware.soapui.support.XmlHolder
+def responseMsg = context.expand( '${步骤1：创建运单-上门提货+自提#Response#$.msg}' )
+
+
+
+
+assert responseMsg =='success'
+</scriptText></con:configuration></con:assertion><con:credentials><con:selectedAuthProfile>No Authorization</con:selectedAuthProfile><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:parameters><entry key="csrfToken" value="${csrfToken#Response#$.data}" xmlns="http://eviware.com/soapui/config"/></con:parameters><con:parameterOrder><con:entry>csrfToken</con:entry></con:parameterOrder></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="查询未出库计划单-keywords" id="569bf18a-a267-49d3-8596-f99e9f13c4e2" disabled="true"><con:settings/><con:config service="http://10.77.0.147" resourcePath="/scTmsWeb/scWebDelivery/queryOutWaybillPlan" methodName="查询未出库计划单" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="查询未出库计划单-keywords" id="4fd7cd83-fbd8-4b1b-a923-56168403d3a6" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;entry key="Cookie" value="session_key=6EA0732944BD434D8F79A53BDD6A2D0A_session_568007135" xmlns="http://eviware.com/soapui/config"/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>http://10.77.0.147</con:endpoint><con:request/><con:originalUri>http://10.77.0.147/scTmsWeb/scWebDelivery/queryOutWaybillPlan</con:originalUri><con:assertion type="GroovyScriptAssertion" id="5a547935-6176-466d-b0b2-62f5e84ed532" name="Assert node [body]"><con:configuration><scriptText>import com.eviware.soapui.support.XmlHolder
+
+def responseMsg= context.expand( '${查询未出库计划单-keywords#Response#$.msg}' )
+
+def responsecustomerOrderNo = context.expand( '${查询未出库计划单-keywords#Response#$.data[0].customerOrderNo}' )
+
+
+assert responseMsg == 'success'
+
+
+assert responsecustomerOrderNo == '客户单号-zky自动化接口测试使用'</scriptText></con:configuration></con:assertion><con:credentials><con:selectedAuthProfile>No Authorization</con:selectedAuthProfile><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:parameters>
+  <con:entry key="csrfToken" value="${csrfToken#Response#$.data}"/>
+  <con:entry key="keywords" value="${DataSource#keywords}"/>
+</con:parameters><con:parameterOrder><con:entry>csrfToken</con:entry><con:entry>keywords</con:entry></con:parameterOrder></con:restRequest></con:config></con:testStep><con:testStep type="datasourceloop" name="DataSource Loop" id="eeca664a-4093-47ac-9ae0-6751fc2975ad" disabled="true"><con:settings/><con:config><dataSourceStep>DataSource</dataSourceStep><targetStep>查询未出库计划单-keywords</targetStep></con:config></con:testStep><con:testStep type="restrequest" name="创建提货" id="c4785b67-367f-4bac-b90f-c9e498a4ca78" disabled="true"><con:settings/><con:config service="http://10.77.0.147" resourcePath="/scTmsWeb/scWebDelivery/createDelivery" methodName="新建提货" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="创建提货" id="2ee78fba-03a2-4aed-8234-4233b1dbd7dc" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;entry key="Cookie" value="session_key=6EA0732944BD434D8F79A53BDD6A2D0A_session_568007135" xmlns="http://eviware.com/soapui/config"/></con:setting></con:settings><con:endpoint>http://10.77.0.147</con:endpoint><con:request>{
+   "type": 2,
+   "waybillPlanList":    [
+            {
+         "arrivalWarehouseId": "${查询未出库计划单-keywords#Response#$.data[0].children[0].arrivalWarehouseId}",
+         "arrivalWarehouseName": "${查询未出库计划单-keywords#Response#$.data[0].children[0].arrivalWarehouseName}",
+         "customerOrderNo": "${查询未出库计划单-keywords#Response#$.data[0].children[0].customerOrderNo}",
+         "deliveryMethod": "1",
+         "directSending": "0",
+         "externalPlanNumber": "${查询未出库计划单-keywords#Response#$.data[0].children[0].externalPlanNumber}",
+         "goodsCode": "${查询未出库计划单-keywords#Response#$.data[0].children[0].goodsCode}",
+         "goodsName": "${查询未出库计划单-keywords#Response#$.data[0].children[0].goodsName}",
+         "goodsNum": "${查询未出库计划单-keywords#Response#$.data[0].children[0].goodsNum}",
+         "goodsPackage": "${查询未出库计划单-keywords#Response#$.data[0].children[0].goodsPackage}",
+         "goodsType": "${查询未出库计划单-keywords#Response#$.data[0].children[0].goodsType}",
+         "loadAmount": 100,
+         "loadVolume": 100,
+         "loadWeight": 100000,
+         "orderNum": "${查询未出库计划单-keywords#Response#$.data[0].children[0].orderNum}",
+         "outBoundGoodsId": "${查询未出库计划单-keywords#Response#$.data[0].children[0].outBoundGoodsId}",
+         "outBoundStatus": "未处理",
+         "planAmount": "${查询未出库计划单-keywords#Response#$.data[0].children[0].planAmount}",
+         "planNum": "",
+         "planVolume": "${查询未出库计划单-keywords#Response#$.data[0].children[0].planVolume}",
+         "planWeight": "${查询未出库计划单-keywords#Response#$.data[0].children[0].planWeight}",
+         "receiverAddress": "${查询未出库计划单-keywords#Response#$.data[0].children[0].receiverAddress}",
+         "receiverId": "${查询未出库计划单-keywords#Response#$.data[0].children[0].receiverId}",
+         "receiverName": "${查询未出库计划单-keywords#Response#$.data[0].children[0].receiverName}",
+         "receiverPhone": "${查询未出库计划单-keywords#Response#$.data[0].children[0].receiverPhone}",
+         "senderAddress": "${查询未出库计划单-keywords#Response#$.data[0].children[0].senderAddress}",
+         "senderId": "${查询未出库计划单-keywords#Response#$.data[0].children[0].senderId}",
+         "senderName": "${查询未出库计划单-keywords#Response#$.data[0].children[0].senderName}",
+         "senderPhone": "${查询未出库计划单-keywords#Response#$.data[0].children[0].senderPhone}",
+         "startWarehouseId": "${查询未出库计划单-keywords#Response#$.data[0].children[0].startWarehouseId}",
+         "startWarehouseName": "${查询未出库计划单-keywords#Response#$.data[0].children[0].startWarehouseName}",
+         "tradeNum": "",
+         "transfarFee": null,
+         "transferFeePayMethod": "",
+         "transportCost": "10.1",
+         "transportNum": "",
+         "waybillNo": "${查询未出库计划单-keywords#Response#$.data[0].children[0].waybillNo}",
+         "waybillNum": "${查询未出库计划单-keywords#Response#$.data[0].children[0].waybillNum}",
+         "key": "${查询未出库计划单-keywords#Response#$.data[0].children[0].externalPlanNumber}-${查询未出库计划单-keywords#Response#$.data[0].children[0].outBoundGoodsId}"
+      }
+   ],
+   "remark": "自动化测试上门提货 1个运单全部计划",
+   "driverName": "zky司机11062-auto",
+   "driverMobile": "13575459073",
+   "driverId": "568029645",
+   "carId": "67fd1263d4d74892a2d7e1dd62226f45",
+   "carNum": "浙DD2233",
+   "startTime": "${DataGen#NOW}",
+   "transportTotalCost": "10.1"
+}</con:request><con:originalUri>http://10.77.0.147/scTmsWeb/scWebDelivery/createDelivery</con:originalUri><con:assertion type="GroovyScriptAssertion" id="8a07d9ce-0556-4d3a-9db3-142848ab204d" name="Assert node [body]"><con:configuration><scriptText>import com.eviware.soapui.support.XmlHolder
+
+def code = context.expand( '${创建提货#Response#$.code}' )
+def count = context.expand( '${创建提货#Response#$.count}' )
+def data = context.expand( '${创建提货#Response#$.data}' )
+def msg = context.expand( '${创建提货#Response#$.msg}' )
+
+
+
+assert code =='0'
+assert count == '0'
+assert msg=='success'</scriptText></con:configuration></con:assertion><con:credentials><con:selectedAuthProfile>No Authorization</con:selectedAuthProfile><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:parameters><entry key="csrfToken" value="${csrfToken#Response#$.data}" xmlns="http://eviware.com/soapui/config"/></con:parameters><con:parameterOrder><con:entry>csrfToken</con:entry></con:parameterOrder></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="执行提配" id="037ffdb5-9cc3-4b74-9c94-d4f6bee63eec" disabled="true"><con:settings/><con:config service="http://10.77.0.147" resourcePath="/scTmsWeb/scWebDelivery/executionDepart" methodName="执行提配" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="执行提配" id="87b3e451-0d95-44ca-83ad-ec29545855df" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;entry key="Cookie" value="session_key=6EA0732944BD434D8F79A53BDD6A2D0A_session_568007135" xmlns="http://eviware.com/soapui/config"/></con:setting></con:settings><con:endpoint>http://10.77.0.147</con:endpoint><con:request>{
+   "transportNum": "${创建提货#Response#$.data}",
+   "type": "2"
+}</con:request><con:originalUri>http://10.77.0.147/scTmsWeb/scWebDelivery/executionDepart</con:originalUri><con:assertion type="GroovyScriptAssertion" id="a99f8dd1-66a8-464b-8222-aa775aa05622" name="Assert node [body]"><con:configuration><scriptText>import com.eviware.soapui.support.XmlHolder
+
+def responseMsg = context.expand( '${执行提配#Response#$.msg}' )
+
+
+assert responseMsg == 'success'
+</scriptText></con:configuration></con:assertion><con:credentials><con:selectedAuthProfile>No Authorization</con:selectedAuthProfile><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:parameters><entry key="csrfToken" value="${csrfToken#Response#$.data}" xmlns="http://eviware.com/soapui/config"/></con:parameters><con:parameterOrder><con:entry>csrfToken</con:entry></con:parameterOrder></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="提配完成" id="67c1bc59-b8fc-47ab-9d3d-ada13184346f" disabled="true"><con:settings/><con:config service="http://10.77.0.147" resourcePath="/scTmsWeb/scWebDelivery/finishDelivery" methodName="提配完成" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="提配完成" id="1aa25e87-cae8-495e-8e25-8c9337011b04" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;entry key="Cookie" value="session_key=6EA0732944BD434D8F79A53BDD6A2D0A_session_568007135" xmlns="http://eviware.com/soapui/config"/></con:setting></con:settings><con:endpoint>http://10.77.0.147</con:endpoint><con:request>{
+   "transportNum": "${创建提货#Response#$.data}",
+   "type": "2"
+}</con:request><con:originalUri>http://10.77.0.147/scTmsWeb/scWebDelivery/finishDelivery</con:originalUri><con:assertion type="GroovyScriptAssertion" id="11016543-9dae-46ac-a0ba-ef7666e4f93e" name="Assert node [body]"><con:configuration><scriptText>import com.eviware.soapui.support.XmlHolder
+
+
+def responsemsg = context.expand( '${提配完成#Response#$.msg}' )
+
+
+assert responsemsg == 'success'
+</scriptText></con:configuration></con:assertion><con:credentials><con:selectedAuthProfile>No Authorization</con:selectedAuthProfile><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:parameters><entry key="csrfToken" value="${csrfToken#Response#$.data}" xmlns="http://eviware.com/soapui/config"/></con:parameters><con:parameterOrder><con:entry>csrfToken</con:entry></con:parameterOrder></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="提货单详情" id="ab9d67f5-c94e-4d7f-8ca1-69c1f1ccd511"><con:settings/><con:config service="http://10.77.0.147" resourcePath="/scTmsWeb/scWebDelivery/queryDeliveryDetail" methodName="提货单详情" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="提货单详情" id="008c04f0-2ac7-4701-ac41-9db7eb5fada9" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;entry key="Cookie" value="session_key=6EA0732944BD434D8F79A53BDD6A2D0A_session_568007135" xmlns="http://eviware.com/soapui/config"/></con:setting></con:settings><con:endpoint>http://10.77.0.147</con:endpoint><con:request>{"type":"提货","transportNum":"TH_T1544971504293"}</con:request><con:originalUri>http://10.77.0.147/scTmsWeb/scWebDelivery/queryDeliveryDetail</con:originalUri><con:assertion type="GroovyScriptAssertion" id="ef62f637-29fb-47a7-83ce-d41e3e52a9c1" name="Assert node [body]"><con:configuration><scriptText>import com.eviware.soapui.support.XmlHolder
+
+def holder = new XmlHolder( messageExchange.responseContentAsXml )
+def node = holder.getDomNode( "//html[1]/body[1]" )
+
+assert node != null
+</scriptText></con:configuration></con:assertion><con:credentials><con:selectedAuthProfile>No Authorization</con:selectedAuthProfile><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:parameters><entry key="csrfToken" value="${csrfToken#Response#$.data}" xmlns="http://eviware.com/soapui/config"/></con:parameters><con:parameterOrder><con:entry>csrfToken</con:entry></con:parameterOrder></con:restRequest></con:config></con:testStep><con:properties/><con:reportParameters/><con:breakPoints><con:testStepId>5bef41f1-580f-4331-baf0-1cac754ee534</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>449fcbc0-6daa-4bbf-8a97-7bdcb3e3f4d3</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>b64c6be9-4f0c-49e8-8c07-d5ab7fa03cd1</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>212d2dba-67cc-4052-b0a0-e0c4958fcbd4</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e921955c-791b-4088-a5ac-c9bc40844d69</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e8bf10ee-15ef-4523-bb52-72ea44b0c097</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d81ac34a-9c5f-44e9-a961-63f4a2705c1d</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d8908fe4-58ed-4537-8171-cd2ed15db69d</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>6672efca-2969-4e41-be32-c5c4b1bcef3a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>adc167fe-32c2-4754-8edf-1f6e8846ae94</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>5622258e-4c7e-4605-aaa6-9ce4759b0aae</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>8cb31fac-6972-482a-9bb1-2c44fed69aca</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f45ebf24-2053-4e58-a8a2-d3df79c3fc9e</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>a0e0acc3-75ff-4a08-b17d-ebde8769eacb</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>2a474df1-c99f-41c9-9258-4ce3e60e0b8c</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>a0a42dc8-f49b-4641-bae6-3dae3e0da626</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>10b7f2be-6835-475c-a7f5-2f5bd9dea0b3</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>7b68c912-4360-4815-aeb5-7e3b19e0e1c0</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>0eea8488-3237-48b4-904e-a1f2d8882dc6</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>a67f2683-db45-42d8-babe-e420740f9714</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase>

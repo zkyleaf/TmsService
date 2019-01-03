@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:testSuite id="2488afd2-99f7-4ae8-bd06-9c82594c5570" name="运单" disabled="true" xmlns:con="http://eviware.com/soapui/config"><con:settings><con:setting id="2488afd2-99f7-4ae8-bd06-9c82594c5570fileName">运单</con:setting></con:settings><con:savedRecentRuns>1</con:savedRecentRuns><con:runType>SEQUENTIAL</con:runType><con:properties/><con:reportParameters/></con:testSuite>

@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:interface xsi:type="con:RestService" id="d507495c-cec3-4dd9-be94-44e8004d6e69" wadlVersion="http://wadl.dev.java.net/2009/02" name="http://10.77.0.147" type="rest" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:con="http://eviware.com/soapui/config"><con:settings><con:setting id="d507495c-cec3-4dd9-be94-44e8004d6e69fileName">http%3A%2F%2F10.77.0.147</con:setting></con:settings><con:definitionCache type="TEXT" rootPart=""/><con:endpoints><con:endpoint>http://10.77.0.147</con:endpoint></con:endpoints></con:interface>
