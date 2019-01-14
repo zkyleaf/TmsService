@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:testSuite id="65b8a174-268c-4c1e-9a1f-084dcf5a7434" name="配载管理" xmlns:con="http://eviware.com/soapui/config"><con:settings><con:setting id="08956126-99cb-4fd1-9ec5-4b442afb19dbfileName">配送管理</con:setting><con:setting id="65b8a174-268c-4c1e-9a1f-084dcf5a7434fileName">配载管理</con:setting></con:settings><con:savedRecentRuns>1</con:savedRecentRuns><con:runType>SEQUENTIAL</con:runType><con:properties/><con:reportParameters/></con:testSuite>

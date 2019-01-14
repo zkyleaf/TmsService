@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:testCase id="3e7854df-562f-4f51-9f5c-9668b498447e" discardOkResults="true" failOnError="true" failTestCaseOnErrors="true" keepSession="true" name="接口校验：配载单列表查询-全部" searchProperties="true" timeout="0" wsrmEnabled="false" wsrmVersion="1.0" wsrmAckTo="" amfAuthorisation="false" amfEndpoint="" amfLogin="" amfPassword="" maxResults="0" xmlns:con="http://eviware.com/soapui/config"><con:settings><con:setting id="8f27ef35-3c9c-4a78-8ecb-7835c20e897bfileName">接口校验%EF%BC%9A配送单列表查询-配送单状态</con:setting><con:setting id="aaf38949-0b20-4169-bc65-77974cd29a9efileName">接口校验%EF%BC%9A配送单列表查询-配送单状态</con:setting><con:setting id="3e7854df-562f-4f51-9f5c-9668b498447efileName">接口校验%EF%BC%9A配载单列表查询-全部</con:setting></con:settings><con:savedRecentRuns>1</con:savedRecentRuns><con:testStep type="properties" name="Properties" id="08850226-fa41-4a97-8da6-c356ff025b85"><con:settings/><con:config xsi:type="con:PropertiesStep" saveFirst="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:properties><con:property><con:name>loginName</con:name><con:value>emt56Ieq5Yqo5YyW5rWL6K+V6LSm5Y+3</con:value></con:property><con:property><con:name>password</con:name><con:value>emt5MTIzNDU2</con:value></con:property><con:property><con:name>mobileNumber</con:name><con:value/></con:property><con:property><con:name>currentWarehouseId</con:name><con:value>568040694</con:value></con:property><con:property><con:name>customerOrderNo</con:name><con:value>客户单号-zky自动化测试账号</con:value></con:property><con:property><con:name>账号：zky自动化测试账号  网点 568040694-网点A</con:name><con:value>只是说明账号</con:value></con:property><con:property><con:name>driverName</con:name><con:value>zhoukeyu</con:value></con:property><con:property><con:name>driverMobile</con:name><con:value>13575459073</con:value></con:property><con:property><con:name>driverId</con:name><con:value>568003517</con:value></con:property><con:property><con:name>carNum</con:name><con:value>浙AB3333</con:value></con:property><con:property><con:name>carId</con:name><con:value>82f0c588b39f4e2183b8d1fd2f80a9c2</con:value></con:property></con:properties></con:config></con:testStep><con:testStep type="datagen" name="DataGen" id="4d46ae63-ff49-4f78-b409-3117b3195152"><con:settings/><con:config xsi:type="con:DataGeneratorStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:property type="Script"><con:configuration><script>
+def  realName="zky司机"+new Date().format("yyyyMMddHHmmss");</script></con:configuration><con:name>realName</con:name><con:mode>STEP</con:mode><con:shared>false</con:shared></con:property><con:property type="Script"><con:configuration><script>def  tf_timestamp=new Date().format("yyyyMMddHHmmss")</script></con:configuration><con:name>tf_timestamp</con:name><con:mode>STEP</con:mode><con:shared>false</con:shared></con:property><con:property type="Script"><con:configuration><script>def waybillNo=Math.random()*10000000</script></con:configuration><con:name>waybillNo</con:name><con:mode>STEP</con:mode><con:shared>false</con:shared></con:property><con:property type="Script"><con:configuration><script>def waybillNum=Math.random()*10000000</script></con:configuration><con:name>waybillNum</con:name><con:mode>STEP</con:mode><con:shared>false</con:shared></con:property><con:property type="Script"><con:configuration><script>def  NOW=new Date().format("yyyy-MM-dd HH:mm:ss")
+</script></con:configuration><con:name>NOW</con:name><con:mode>STEP</con:mode><con:shared>false</con:shared></con:property></con:config></con:testStep><con:testStep type="groovy" name="tf_sign" id="417a4f47-eec9-436c-af8d-a741f9eacfec"><con:settings/><con:config><script><![CDATA[import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.Map;
+import groovy.json.JsonSlurper;
+
+handleParamaters("会员登录","K77MFVhwk348J4h72nHi");
+
+def void handleParamaters(String testStepName,String myKey)
+{
+
+	//如果没有有时间戳，请删除
+	def time=new Date().format("yyyyMMddHHmmss")
+	testRunner.testCase.getTestStepByName(testStepName).setPropertyValue("tf_timestamp",time)
+
+	
+	//自动获取参数
+	List<String> list=testRunner.testCase.getTestStepByName(testStepName).getPropertyNames()
+	Map<String, String> map = new HashMap<String, String>();
+	for(int i=0;i<list.size();i++)
+	{
+//		if(!list.get(i).equals("RawRequest")&&list.get(i)!="ResponseAsXml"&&list.get(i)!="Domain"&&list.get(i)!="Password"&&list.get(i)!="Username"&&list.get(i)!="Response"&&list.get(i)!="Request"&&list.get(i)!="Endpoint"&&list.get(i)!="sign")
+		if(!list.get(i).equals("RawRequest")&&list.get(i)!="ResponseAsXml"&&list.get(i)!="Domain"&&list.get(i)!="Password"&&list.get(i)!="Username"&&list.get(i)!="Response"&&list.get(i)!="Request"&&list.get(i)!="Endpoint"&&list.get(i)!="sign"&&list.get(i)!="HarResponse"&&list.get(i)!="RawResponse"&&list.get(i)!="callback"&&list.get(i)!="tf_ignore")
+		{
+			def res = context.expand(testRunner.testCase.getTestStepByName(testStepName).getPropertyValue(list.get(i)));
+			log.info('res--------'+res);
+			map.put(list.get(i),res);
+		}
+	}
+	//加密
+	String md5 = sign(map,myKey,"utf-8")
+	//将加密值传给sign
+	testRunner.testCase.getTestStepByName(testStepName).setPropertyValue("tf_sign",md5)
+	
+}
+
+/**
+	 * 签名字符串
+	 * @param params
+	 * @param key
+	 * @param charset
+	 * @return
+	 */
+def String sign(Map<String,String> params, String key, String charset) {
+
+    	//1. tf_sign不加入签名
+    	params.remove('tf_sign');
+    	//2. 加入sk
+    	params.put('dog_sk', key);
+		//3. 对请求参数的值进行排序
+		String keyString = createLinkString(params);
+		//4. 生成md5
+		return generateMd5(keyString, charset);
+    }
+
+
+    
+    /**
+     * 生成md5
+     * @param key
+     * @param charset
+     * @return
+     */
+def String generateMd5(String keyString, String charset){
+    	String result = '';
+		try {
+			MessageDigest md5 = MessageDigest.getInstance('MD5');
+			md5.update(keyString.getBytes(charset));
+			byte[] temp;
+			temp = md5.digest(''.getBytes(charset));
+			for (int i = 0; i < temp.length; i++) {
+				result += Integer.toHexString(((int)0x000000ff & temp[i]) | (int)0xffffff00).substring(6);
+			}	
+			result = result.toUpperCase();
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException('MD5签名过程中出现错误' + e);
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException('MD5签名过程中出现错误,指定的编码集不对,您目前指定的编码集是:' + charset);
+		}    	
+		return result;
+    }
+
+
+
+
+    /** 
+     * 把数组所有元素排序，并参数值拼接成字符串
+     * @param params 需要排序并参与字符拼接的参数组
+     * @return 拼接后字符串
+     */
+def String createLinkString(Map<String, String> params) {
+    	Object[] keys = params.keySet().toArray();
+        Arrays.sort(keys);
+        StringBuffer sb = new StringBuffer();
+		for (int i = keys.length - 1; i >= 0; i--) {
+			sb.append(params.get(keys[i]));
+		}
+        return sb.toString();
+    }]]></script></con:config></con:testStep><con:testStep type="restrequest" name="会员登录" id="e88b82d3-caf1-4095-80d8-56379615d8b6"><con:settings/><con:config service="http://10.7.28.14" resourcePath="/passport/partycommonmanage/webLogin" methodName="Method 1" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="会员登录" id="c6591842-78d3-4cec-a58f-781e17e1fdd9" mediaType="application/json"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://10.7.28.14</con:endpoint><con:request/><con:originalUri>http://10.7.28.14/passport/partycommonmanage/webLogin</con:originalUri><con:assertion type="JsonPath Match" id="4137c62e-8ae9-48f1-aa6f-5c56f9d39693" name="Match content of [msg]"><con:configuration><path>$.msg</path><content>success</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:credentials><con:selectedAuthProfile>No Authorization</con:selectedAuthProfile><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:parameters>
+  <con:entry key="tf_timestamp" value="20190114102953"/>
+  <con:entry key="clientdfp" value="wertyuighf"/>
+  <con:entry key="password" value="${Properties#password}"/>
+  <con:entry key="loginName" value="${Properties#loginName}"/>
+  <con:entry key="tf_sign" value="EE27622A4869237D754D6C4AB133290A"/>
+</con:parameters><con:parameterOrder><con:entry>dog_ak</con:entry><con:entry>sourcecode</con:entry><con:entry>tf_timestamp</con:entry><con:entry>clientdfp</con:entry><con:entry>tf_ignore</con:entry><con:entry>loginName</con:entry><con:entry>password</con:entry><con:entry>clientIp</con:entry><con:entry>tf_sign</con:entry></con:parameterOrder></con:restRequest></con:config></con:testStep><con:testStep type="groovy" name="cookies" id="78581b36-f9af-45ee-83f8-93b300f50879"><con:settings/><con:config><script>import net.sf.json.JSONObject;
+import com.eviware.soapui.support.types.StringToStringMap
+
+//获取token
+String data = context.expand( '${会员登录#Response#$.data}' )
+JSONObject json=JSONObject.fromObject(data)
+log.info(json);
+String token1="session_key="+json.getString('session_key');
+//log.info("session_key的值为：" + token);
+String warehousekey="_warehouse_key="+'568028583';
+
+log.info("warehousekey"+warehousekey);
+String token=token1+";"+warehousekey;
+log.info("token"+token);
+
+//设置map
+HashMap&lt;String,String> hashmap1=new HashMap&lt;String,String>()
+hashmap1.put('Cookie',token1)
+StringToStringMap cookieMap1 = new StringToStringMap(hashmap1)
+log.info("cookieMap1"+cookieMap1);
+
+//设置map +warehousekey
+HashMap&lt;String,String> hashmap=new HashMap&lt;String,String>()
+hashmap.put('Cookie',token)
+StringToStringMap cookieMap = new StringToStringMap(hashmap)
+log.info("cookieMap"+cookieMap);
+//设置cookie
+testRunner.testCase.getTestStepByName("csrfToken").testRequest.setRequestHeaders(cookieMap1);
+testRunner.testCase.getTestStepByName("切换网点").testRequest.setRequestHeaders(cookieMap1);
+testRunner.testCase.getTestStepByName("配载单列表查询").testRequest.setRequestHeaders(cookieMap1);
+
+
+
+
+
+
+//设置cookie  ： sessionkey+warehousekey
+//testRunner.testCase.getTestStepByName("查询司机列表").testRequest.setRequestHeaders(cookieMap);
+</script></con:config></con:testStep><con:testStep type="restrequest" name="csrfToken" id="a51ee3e0-b87a-4f74-bfdb-7867a65cb53a"><con:settings/><con:config service="http://10.77.0.147" resourcePath="/scTmsWeb/csrfTokenServlet" methodName="获取csrfToken" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="csrfToken" id="99fd653c-4388-4e64-9456-a5c596410372" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;entry key="Cookie" value="session_key=B9F0BE06886C45BD9B30F752D82B1596_session_568040686" xmlns="http://eviware.com/soapui/config"/></con:setting></con:settings><con:endpoint>http://10.77.0.147</con:endpoint><con:request/><con:originalUri>http://10.77.0.147/scTmsWeb/csrfTokenServlet</con:originalUri><con:assertion type="JsonPath Match" id="fa93f2c2-86f7-4041-af19-60c19d853533" name="Match content of [result]"><con:configuration><path>$.result</path><content>success</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:credentials><con:selectedAuthProfile>No Authorization</con:selectedAuthProfile><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:parameters/><con:parameterOrder/></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="切换网点" id="ccc90855-e9ec-4bc4-9a19-375011d8bf5a"><con:settings/><con:config service="http://10.77.0.147" resourcePath="/scTmsWeb/warehouse/changeCurrentWarehouse" methodName="切换网点" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="切换网点" id="aa421939-b243-432f-8602-ac01462e4092" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;entry key="Cookie" value="session_key=B9F0BE06886C45BD9B30F752D82B1596_session_568040686" xmlns="http://eviware.com/soapui/config"/></con:setting></con:settings><con:encoding>UTF-8</con:encoding><con:endpoint>http://10.77.0.147</con:endpoint><con:request>{"currentWarehouseId": "${Properties#currentWarehouseId}"}</con:request><con:originalUri>http://10.77.0.147/scTmsWeb/warehouse/changeCurrentWarehouse</con:originalUri><con:assertion type="JsonPath Match" id="5a2815ed-1435-4c3d-8461-1b6e51557c14" name="Match content of [msg]"><con:configuration><path>$.msg</path><content>success</content><allowWildcards>false</allowWildcards><ignoreNamspaceDifferences>false</ignoreNamspaceDifferences><ignoreComments>false</ignoreComments></con:configuration></con:assertion><con:credentials><con:selectedAuthProfile>No Authorization</con:selectedAuthProfile><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:parameters><entry key="csrfToken" value="${csrfToken#Response#$.data}" xmlns="http://eviware.com/soapui/config"/></con:parameters><con:parameterOrder><con:entry>csrfToken</con:entry></con:parameterOrder></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="配送单列表查询-配送单状态" id="be2a86d5-b4c7-4feb-80ea-0672c96c26c8" disabled="true"><con:settings/><con:config service="http://10.77.0.147" resourcePath="/scTmsWeb/scWebDelivery/queryDelivery" methodName="提货单列表查询" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="配送单列表查询-配送单状态" id="e1ba2fea-fb22-4be8-a170-235a585e401d" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;entry key="Cookie" value="session_key=D33D351005AB4FF880EF226BD20E12F7_session_568040686" xmlns="http://eviware.com/soapui/config"/></con:setting></con:settings><con:endpoint>http://10.77.0.147</con:endpoint><con:request>{
+   "pageNo": 0,
+   "pageSize": 20,
+   "transportStatus": "${DataSource#transportStatus}",
+   "type": "3"
+}</con:request><con:originalUri>http://10.77.0.147/scTmsWeb/scWebDelivery/queryDelivery</con:originalUri><con:assertion type="GroovyScriptAssertion" id="58635a66-9fef-4bd0-8387-9a4478ca9004" name="Assert node [body]"><con:configuration><scriptText>import com.eviware.soapui.support.XmlHolder
+
+def responcetransportStatus = context.expand( '${配送单列表查询-配送单状态#Response#$.data[0].transportStatus}' )
+def responsemsg = context.expand( '${配送单列表查询-配送单状态#Response#$.msg}' )
+
+
+
+def transportStatus = context.expand( '${DataSource#transportStatus}' )
+assert responcetransportStatus == transportStatus
+assert responsemsg=='success'
+</scriptText></con:configuration></con:assertion><con:credentials><con:selectedAuthProfile>No Authorization</con:selectedAuthProfile><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:parameters><entry key="csrfToken" value="${csrfToken#Response#$.data}" xmlns="http://eviware.com/soapui/config"/></con:parameters><con:parameterOrder><con:entry>csrfToken</con:entry></con:parameterOrder></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="配载单列表查询" id="77f5040f-3de0-4800-951b-bfbfb4358c48"><con:settings/><con:config service="http://10.77.0.147" resourcePath="/scTmsWeb/scWebTransPort/queryTransport" methodName="配载单列表查询" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="配载单列表查询" id="dff61502-9f93-4733-bd42-68da2e2b9a86" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;entry key="Cookie" value="session_key=B9F0BE06886C45BD9B30F752D82B1596_session_568040686" xmlns="http://eviware.com/soapui/config"/></con:setting></con:settings><con:endpoint>http://10.77.0.147</con:endpoint><con:request>{"pageNo":0,"pageSize":20}</con:request><con:originalUri>http://10.77.0.147/scTmsWeb/scWebTransPort/queryTransport</con:originalUri><con:assertion type="GroovyScriptAssertion" id="57e6e4a3-17f0-45f0-a6f1-760d0e57cfdf" name="Assert node [body]"><con:configuration><scriptText>import com.eviware.soapui.support.XmlHolder
+
+def responsemsg = context.expand( '${配载单列表查询#Response#$.msg}' )
+
+assert responsemsg=='success'
+</scriptText></con:configuration></con:assertion><con:credentials><con:selectedAuthProfile>No Authorization</con:selectedAuthProfile><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:parameters><entry key="csrfToken" value="${csrfToken#Response#$.data}" xmlns="http://eviware.com/soapui/config"/></con:parameters><con:parameterOrder><con:entry>csrfToken</con:entry></con:parameterOrder></con:restRequest></con:config></con:testStep><con:properties/><con:reportParameters/><con:breakPoints><con:testStepId>5bef41f1-580f-4331-baf0-1cac754ee534</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>449fcbc0-6daa-4bbf-8a97-7bdcb3e3f4d3</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>b64c6be9-4f0c-49e8-8c07-d5ab7fa03cd1</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>212d2dba-67cc-4052-b0a0-e0c4958fcbd4</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e921955c-791b-4088-a5ac-c9bc40844d69</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e8bf10ee-15ef-4523-bb52-72ea44b0c097</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d81ac34a-9c5f-44e9-a961-63f4a2705c1d</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>d8908fe4-58ed-4537-8171-cd2ed15db69d</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>6672efca-2969-4e41-be32-c5c4b1bcef3a</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>adc167fe-32c2-4754-8edf-1f6e8846ae94</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>5622258e-4c7e-4605-aaa6-9ce4759b0aae</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>8cb31fac-6972-482a-9bb1-2c44fed69aca</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>f45ebf24-2053-4e58-a8a2-d3df79c3fc9e</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>a0e0acc3-75ff-4a08-b17d-ebde8769eacb</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>2a474df1-c99f-41c9-9258-4ce3e60e0b8c</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>a0a42dc8-f49b-4641-bae6-3dae3e0da626</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>10b7f2be-6835-475c-a7f5-2f5bd9dea0b3</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>7b68c912-4360-4815-aeb5-7e3b19e0e1c0</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>039baa84-d5a3-49c8-9d74-b1ef0a2cbfa8</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>7913d415-5709-4ff3-8d07-031eaa6703bb</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase>
